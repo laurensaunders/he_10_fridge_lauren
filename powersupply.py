@@ -5,6 +5,7 @@
 import serial
 import time
 
+ps_names = []
 
 class PowerSupply(object):
 
@@ -19,8 +20,10 @@ class PowerSupply(object):
 		self.output_on=driver_dict['output_on']
 		self.remote=driver_dict['remote']
 		self.error_ask=driver_dict['error_ask']
+		self.vmin=driver_dict['vmin']
+		self.vmax=driver_dict['vmax']
 
-	# Identification command	
+	# Identification command
 	def who_am_i(self):
 		self.serial_connex.write(self.idn + self.term)
 		return self.serial_connex.readline()
@@ -31,7 +34,7 @@ class PowerSupply(object):
 			self.serial_connex.write(self.remote + self.term)
 		else:
 			pass
-	
+
 	# Ask the power supply for an error message
 	def error(self):
 		self.serial_connex.write(self.error_ask + self.term)
@@ -43,23 +46,23 @@ class PowerSupply(object):
 			self.serial_connex.write(self.output + self.term)
 			self.serial_connex.readline()
 			self.serial_connex.write(self.output_on + self.term)
-			self.serial_connex.readline()		
+			self.serial_connex.readline()
 		self.serial_connex.write(self.v_ask + self.term)
 		x=self.serial_connex.readline()
 		return x
 
 	# Set voltages
 	def set_voltage(self, voltage):
-		if not (voltage>=0 and voltage<=35.0):
+		if not (voltage>=self.vmin and voltage<=self.vmax):
 			print 'Voltage out of range!'
 			return
 		if self.output is not None:
 			self.serial_connex.write(self.output + self.term)
 			self.serial_connex.readline()
 			self.serial_connex.write(self.output_on + self.term)
-			self.serial_connex.readline()		
+			self.serial_connex.readline()
 		self.serial_connex.write(self.v_apply + ' ' + str(voltage) + self.term)
-		
+
 	def driver_parser(self, driverfile,terminal):
 		agilent_1 = {'serial_connex':serial.Serial(port='/dev/ttyr00', baudrate=9600, parity=serial.PARITY_ODD, stopbits=serial.STOPBITS_TWO, bytesize=serial.SEVENBITS, timeout=1),
 			   'term': '\r\n',
@@ -69,17 +72,20 @@ class PowerSupply(object):
 			   'output':'INST:SEL OUT1',
 			   'output_on':'OUTP ON',
 			   'remote':'SYST:REM',
-			   'error_ask':'SYST:ERR?'
+			   'error_ask':'SYST:ERR?',
+			   'vmin':0,
+			   'vmax':35.0
 			    }
 		agilent_2 = {'serial_connex':serial.Serial(port='/dev/ttyr00', baudrate=9600, parity=serial.PARITY_ODD, stopbits=serial.STOPBITS_TWO, bytesize=serial.SEVENBITS, timeout=1),
 			   'term': '\r\n',
 			   'v_ask':'MEAS:VOLT?',
 			   'v_apply':'APPL',
-			   'idn':'*IDN?',
 			   'output':'INST:SEL OUT2',
 			   'output_on':'OUTP ON',
 			   'remote':'SYST:REM',
-			   'error_ask':'SYST:ERR?'
+			   'error_ask':'SYST:ERR?',
+			   'vmin':0.0,
+			   'vmax':35.0
 			    }
 		if terminal==1:
 			return agilent_1
