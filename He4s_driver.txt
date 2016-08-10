@@ -1,11 +1,14 @@
-Driver for Agilent E3647A power supply, output 2 (He4s).
-
-'serial_connex':serial.Serial(port='/dev/ttyr00', baudrate=9600, parity=serial.PARITY_ODD, stopbits=serial.STOPBITS_TWO, bytesize=serial.SEVENBITS)
-'term':'\r\n'
-'v_ask':'MEAS:VOLT?'
-'v_apply':'APPL'
-'idn':'*IDN?'
-'output':'INST:SEL OUT2'
-'output_on':'OUTP ON'
-'remote':'SYST:REM'
-'err_ask':'SYST:ERR?'
+type=serial
+port=/dev/ttyr00
+baudrate=9600
+parity=odd
+stopbits=2
+bytesize=7
+term=\r\n
+v_ask=MEAS:VOLT?
+v_apply=APPL
+idn=*IDN?
+output=INST:SEL OUT2
+output_on=OUTP ON
+remote=SYST:REM
+err_ask=SYST:ERR?
