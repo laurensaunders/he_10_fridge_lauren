@@ -1,6 +1,6 @@
 # powersupply.py
 #
-# Python class for power supplies.
+# Python class for power supplies connected via serial ports.
 
 import serial
 import time
@@ -27,7 +27,7 @@ class PowerSupply(object):
 			bytesize=serial.SEVENBITS
 		if driver_dict['bytesize']==8:
 			bytesize=serial.EIGHTBITS
-		self.serial_connex=serial.Serial(port=driver_dict['port'], baudrate=driver_dict['baudrate'], parity=parity, stopbits=stopbits, bytesize=bytesize, timeout=driver_dict['timeout'])
+		self.serial_connex=serial.Serial(port=str(driver_dict['port']), baudrate=driver_dict['baudrate'], parity=parity, stopbits=stopbits, bytesize=bytesize, timeout=driver_dict['timeout'])
 		self.v_apply=str(driver_dict['v_apply'])
 		self.v_ask=str(driver_dict['v_ask'])
 		self.idn=str(driver_dict['idn'])
@@ -56,6 +56,7 @@ class PowerSupply(object):
 		self.serial_connex.write(self.error_ask + self.term)
 		return self.serial_connex.readline()
 
+	# Turn a particular output on and do nothing else
 	def turn_output_on(self):
 		if self.output_on==None:
 			pass
@@ -79,18 +80,17 @@ class PowerSupply(object):
 			print 'Voltage out of range!'
 			return
 		if self.output is not None:
-		#	self.serial_connex.write(self.output + self.term)
-		#	self.serial_connex.readline()
 			self.serial_connex.write(self.output_on + self.term)
 			self.serial_connex.readline()
 		self.serial_connex.write(self.v_apply + ' ' + str(voltage) + self.term)
 
+	# Program draws the driver dictionaries from driver files.  Currently test files, need to update to actual driver files.
 	def driver_parser(self,driverfile,terminal):
 		if terminal==1:
 			out1 = {}
 			with open('test_1.txt','r') as f:
 				for line in f:
-					listedline = line.strip().decode('unicode-escape').split('   ')
+					listedline = line.strip().decode('unicode-escape').split('=')
 					if len(listedline)>1:
 						out1[listedline[0]] = listedline[1]
 				f.close()
@@ -99,20 +99,6 @@ class PowerSupply(object):
 			out2 = {}
 			with open('test_2.txt','r') as f:
 				for line in f:
-					listedline = line.strip().split('   ')
+					listedline = line.strip().split('=')
 					if len(listedline)>1:
 						out2[listedline[0]=listedline[1]]
-		#agilent_2 = {'serial_connex':serial.Serial(port='/dev/ttyr00', baudrate=9600, parity=serial.PARITY_ODD, stopbits=serial.STOPBITS_TWO, bytesize=serial.SEVENBITS, timeout=1),
-		#	   'term': '\r\n',
-		#	   'v_ask':'INST:SEL OUT2 MEAS:VOLT?',
-		#	   'v_apply':'INST:SEL OUT2: OUTP ON; APPL',
-		#	   'output_on':'INST:SEL OUT2 OUTP ON',
-		#	   'remote':'SYST:REM',
-		#	   'error_ask':'SYST:ERR?',
-		#	   'vmin':0.0,
-		#	   'vmax':35.0
-		#	    }
-		#if terminal==1:
-		#	return agilent_1
-		#if terminal==2:
-		#	return agilent_2
